@@ -1,4 +1,4 @@
-import os, sys, json
+import os, sys, json, random
 
 def modFile(infile):
 
@@ -6,7 +6,7 @@ def modFile(infile):
 	outfile = infile[:infile.index('.')] + '_mod' + infile[infile.index('.'):]
 
 	# read infile data 
-	with open(infile) as f:
+	with open(infile, encoding='latin-1') as f:
 		print('Reading file...')
 		data = json.load(f)
 
@@ -31,13 +31,17 @@ def modFile(infile):
 			app['housingOption'] = 'Resident'
 		else :
 			app['housingOption'] = 'Commuter'
+			
+	# delete 5 random records
+	for i in range(5):
+		del data[random.randint(0,len(data))]
 
 
 	# write output file
 	with open(outfile, 'w') as f:
 		print('Writing modified file...')
 		json.dump(data, f, indent = 2) 
-		print('File successfully modified, ' + outfile)
+		print('Success. Modified file: ' + outfile)
 
 # get input file from arg
 infile = str(sys.argv[1])
