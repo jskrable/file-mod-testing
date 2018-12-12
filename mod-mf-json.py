@@ -6,7 +6,7 @@ def modFile(infile):
 	outfile = infile[:infile.index('.')] + '_mod' + infile[infile.index('.'):]
 
 	# read infile data 
-	with open(infile, encoding='latin-1') as f:
+	with open(infile) as f:
 		print('Reading file...')
 		data = json.load(f)
 
