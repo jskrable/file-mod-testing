@@ -78,24 +78,23 @@ def object_diff(new, old, mod, buid):
 def diff(uids, new, old):
     print('Running diff...')
 
+    objects = [*new[0]]
+
     for i in uids:
         mod = {}
-        try:
-            new_person = [x['applicant'] for x in new if x['applicant']['univId'] == i][0]
-            old_person = [x['applicant'] for x in old if x['applicant']['univId'] == i][0]
-            new_app = [x['application'] for x in new if x['applicant']['univId'] == i][0]
-            old_app = [x['application'] for x in old if x['applicant']['univId'] == i][0]
-            new_couns = [x['counselor'] for x in new if x['applicant']['univId'] == i][0]
-            old_couns = [x['counselor'] for x in old if x['applicant']['univId'] == i][0]
-        except IndexError:
-            mod.update({'buid': i,
-                        'error': 'Insert/delete'
-                        })
-        
-        mod = object_diff(new_person,old_person,mod,i)
-        mod = object_diff(new_app,old_app,mod,i)
-        mod = object_diff(new_couns,old_couns,mod,i)
-
+        for obj in objects:
+            try:
+                new_entry = [x[obj] for x in new if x['applicant']['univId'] == i][0]
+                old_entry = [x[obj] for x in old if x['applicant']['univId'] == i][0]
+                print('Diffing %s for %s' % (obj, i))
+                mod = object_diff(new_entry,old_entry,mod,i)
+            except (IndexError, TypeError, KeyError) as e:
+                # mod.update({'buid': i,
+                #         'error': 'Insert/delete'
+                #          })
+                print('Cannot diff %s for %s' % (obj, i))
+                print(e)
+                pass
         output(mod)
         mod = {}
 
