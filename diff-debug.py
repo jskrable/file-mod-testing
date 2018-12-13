@@ -39,34 +39,43 @@ def output(mod):
                 f.write(']')
         
 
-def object_diff(new, old, mod, buid):
+def object_diff(obj_name, new, old, mod, buid):
     
     # Update mod dict
 
     def new_mod():
         # Insert new key
+        name = obj_name+'-'+key
         d = {'buid': buid,
                 'new': {
-                    key: new[key]
+                    name: new[key]
                     },
                 'old': {
-                    key: old[key]
+                    name: old[key]
                     }
                 }
         mod.update(d)
 
     # Loop through object
-    for key in new:
-        if new[key] != old[key]:
-            # Update mod dict if different
-            if not mod:
-                new_mod()
-            else:
-                try: 
-                    mod['new'].update({key: new[key]})
-                    mod['old'].update({key: old[key]})
-                except KeyError:
+    try:
+        for key in new:
+            if new[key] != old[key]:
+                # Update mod dict if different
+                if not mod:
                     new_mod()
+                else:
+                    name = obj_name+'-'+key
+                    mod['new'].update({name: new[key]})
+                    mod['old'].update({name: old[key]})
+                    # except KeyError:
+                    #     new_mod()
+    except (TypeError, KeyError) as e:
+        # Catch lists and run diff each index
+        for i, obj in enumerate(new):
+            name = obj_name+'-'+str(i)
+            object_diff(name, obj, old[i], mod, buid)
+        
+        
 
     return mod
         
@@ -90,7 +99,7 @@ def diff(uids, new, old):
                 old_entry = [x[obj] for x in old if x['applicant']['univId'] == i][0]
                 print('Diffing %s for %s' % (obj, i))
                 # Update mod with differences
-                mod = object_diff(new_entry,old_entry,mod,i)
+                mod = object_diff(obj,new_entry,old_entry,mod,i)
             # Catch inserts/deletes
             except IndexError:
                 mod.update({'buid': i,
@@ -99,7 +108,6 @@ def diff(uids, new, old):
             # Catch missing objects
             except(TypeError, KeyError) as e:
                 print('Cannot diff %s for %s' % (obj, i))
-                print(e)
                 pass
         # Append results file
         output(mod)
